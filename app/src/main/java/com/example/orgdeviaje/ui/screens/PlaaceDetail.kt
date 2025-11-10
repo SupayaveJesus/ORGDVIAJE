@@ -16,7 +16,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
-import com.example.orgdeviaje.data.RetrofitInstance
 import com.example.orgdeviaje.data.model.Lugar
 import com.example.orgdeviaje.ui.theme.ORGDEViajeTheme
 import com.example.orgdeviaje.viewmodels.LugarViewModel
@@ -31,12 +30,31 @@ fun PlaceDetailScreen(
     var lugar by remember { mutableStateOf<Lugar?>(null) }
     var loading by remember { mutableStateOf(true) }
 
-    // 🔹 Cargar los datos del lugar desde API directamente
+    // Cargar el lugar desde el ViewModel o API si no está
     LaunchedEffect(lugarId) {
         try {
-            val result = RetrofitInstance.api.getLugares()
-            val encontrado = result.find { it.id == lugarId }
-            lugar = encontrado
+            if (viewModel.listLugares.isEmpty()) {
+                viewModel.getAllPlaces()
+            }
+
+            val encontrado = viewModel.listLugares.find { it.id == lugarId }
+            if (encontrado != null) {
+                lugar = encontrado
+            } else {
+                // Si no está en la lista local, lo busca directamente de la API
+                val all = viewModel.listLugares.ifEmpty {
+                    try {
+                        val fetched = com.example.orgdeviaje.data.RetrofitInstance.api.getLugares()
+                        viewModel.listLugares.clear()
+                        viewModel.listLugares.addAll(fetched)
+                        fetched
+                    } catch (e: Exception) {
+                        println("Error al cargar lugares: ${e.message}")
+                        emptyList()
+                    }
+                }
+                lugar = all.find { it.id == lugarId }
+            }
         } catch (e: Exception) {
             println("Error al cargar lugar: ${e.message}")
         } finally {
@@ -66,20 +84,9 @@ fun PlaceDetailScreen(
             contentAlignment = Alignment.Center
         ) {
             when {
-                loading -> {
-                    CircularProgressIndicator()
-                }
-
-                lugar == null -> {
-                    Text(
-                        text = "No se encontró la información del lugar.",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                }
-
-                else -> {
-                    LugarDetalleCard(lugar!!)
-                }
+                loading -> CircularProgressIndicator()
+                lugar == null -> Text("No se encontró la información del lugar.")
+                else -> LugarDetalleCard(lugar!!)
             }
         }
     }
@@ -120,34 +127,22 @@ fun LugarDetalleCard(lugar: Lugar) {
         Spacer(modifier = Modifier.height(12.dp))
 
         if (!lugar.descripcion.isNullOrEmpty()) {
-            Text(
-                text = lugar.descripcion,
-                style = MaterialTheme.typography.bodyMedium
-            )
+            Text(lugar.descripcion, style = MaterialTheme.typography.bodyMedium)
             Spacer(modifier = Modifier.height(8.dp))
         }
 
         if (!lugar.indicaciones.isNullOrEmpty()) {
-            Text(
-                text = "📍 Cómo llegar: ${lugar.indicaciones}",
-                style = MaterialTheme.typography.bodyMedium
-            )
+            Text(" Cómo llegar: ${lugar.indicaciones}", style = MaterialTheme.typography.bodyMedium)
             Spacer(modifier = Modifier.height(8.dp))
         }
 
         if (!lugar.tiempoEstimado.isNullOrEmpty()) {
-            Text(
-                text = "🕒 Tiempo estimado: ${lugar.tiempoEstimado}",
-                style = MaterialTheme.typography.bodyMedium
-            )
+            Text("Tiempo estimado: ${lugar.tiempoEstimado}", style = MaterialTheme.typography.bodyMedium)
             Spacer(modifier = Modifier.height(8.dp))
         }
 
         if (!lugar.precio.isNullOrEmpty()) {
-            Text(
-                text = "💰 Precio: ${lugar.precio}",
-                style = MaterialTheme.typography.bodyMedium
-            )
+            Text(" Precio: ${lugar.precio}", style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
@@ -157,9 +152,6 @@ fun LugarDetalleCard(lugar: Lugar) {
 fun PlaceDetailPreview() {
     ORGDEViajeTheme {
         val navController = rememberNavController()
-        PlaceDetailScreen(
-            lugarId = 1,
-            navController = navController
-        )
+        PlaceDetailScreen(lugarId = 1, navController = navController)
     }
 }

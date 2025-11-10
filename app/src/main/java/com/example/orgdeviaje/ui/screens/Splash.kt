@@ -57,6 +57,7 @@ fun SplashLoginScreen(
                     if (username.text.isNotEmpty()) {
                         navController.navigate("home/${username.text}")
                     }
+
                 }
             ) {
                 Text("Ingresar")

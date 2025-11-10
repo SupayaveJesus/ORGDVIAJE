@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.orgdeviaje.ui.nav.NavScreens
 import com.example.orgdeviaje.ui.screens.*
 import com.example.orgdeviaje.ui.theme.ORGDEViajeTheme
 
@@ -29,62 +30,63 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AppNavigation() {
+
     val navController = rememberNavController()
 
     NavHost(
         navController = navController,
-        startDestination = "splash"
+        startDestination = NavScreens.SPLASH.name
     ) {
-        // Splash
-        composable("splash") {
+        // 🟢 Splash / Login
+        composable(NavScreens.SPLASH.name) {
             SplashLoginScreen(navController = navController)
         }
 
-        //Home (todos los viajes)
+        // 🟡 Home (todos los viajes)
         composable(
-            route = "home/{username}",
+            route = "${NavScreens.HOME.name}/{username}",
             arguments = listOf(navArgument("username") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val username = backStackEntry.arguments?.getString("username") ?: ""
+        ) { backStack ->
+            val username = backStack.arguments?.getString("username") ?: ""
             HomeScreen(navController = navController, username = username)
         }
 
-        //Mis viajes (corregido)
+        // 🟣 Mis viajes
         composable(
-            route = "mytrips/{username}",
+            route = "${NavScreens.MY_TRIPS.name}/{username}",
             arguments = listOf(navArgument("username") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val username = backStackEntry.arguments?.getString("username") ?: ""
+        ) { backStack ->
+            val username = backStack.arguments?.getString("username") ?: ""
             MisViajesScreen(
                 userName = username,
                 navController = navController
             )
         }
 
-        //Crear un viaje nuevo
+        // 🟢 Crear viaje
         composable(
-            route = "addTrip/{username}",
+            route = "${NavScreens.ADD_TRIP.name}/{username}",
             arguments = listOf(navArgument("username") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val username = backStackEntry.arguments?.getString("username") ?: ""
+        ) { backStack ->
+            val username = backStack.arguments?.getString("username") ?: ""
             AddTripScreen(
                 userName = username,
                 navController = navController
             )
         }
 
-        // Detalle del viaje (corregido)
+        // 🔵 Detalle del viaje
         composable(
-            route = "tripDetail/{viajeId}/{viajeNombre}/{userName}",
+            route = "${NavScreens.TRIP_DETAIL.name}/{viajeId}/{viajeNombre}/{userName}",
             arguments = listOf(
                 navArgument("viajeId") { type = NavType.IntType },
                 navArgument("viajeNombre") { type = NavType.StringType },
                 navArgument("userName") { type = NavType.StringType }
             )
-        ) { backStackEntry ->
-            val viajeId = backStackEntry.arguments?.getInt("viajeId") ?: 0
-            val viajeNombre = backStackEntry.arguments?.getString("viajeNombre") ?: ""
-            val userName = backStackEntry.arguments?.getString("userName") ?: ""
+        ) { backStack ->
+            val viajeId = backStack.arguments?.getInt("viajeId") ?: 0
+            val viajeNombre = backStack.arguments?.getString("viajeNombre") ?: ""
+            val userName = backStack.arguments?.getString("userName") ?: ""
             TripDetalleScreen(
                 viajeId = viajeId,
                 viajeNombre = viajeNombre,
@@ -93,18 +95,18 @@ fun AppNavigation() {
             )
         }
 
-        //Agregar lugar
+        // 🟠 Agregar lugar
         composable(
-            route = "addPlace/{viajeId}/{viajeNombre}/{userName}",
+            route = "${NavScreens.ADD_PLACE.name}/{viajeId}/{viajeNombre}/{userName}",
             arguments = listOf(
                 navArgument("viajeId") { type = NavType.IntType },
                 navArgument("viajeNombre") { type = NavType.StringType },
                 navArgument("userName") { type = NavType.StringType }
             )
-        ) { backStackEntry ->
-            val viajeId = backStackEntry.arguments?.getInt("viajeId") ?: 0
-            val viajeNombre = backStackEntry.arguments?.getString("viajeNombre") ?: ""
-            val userName = backStackEntry.arguments?.getString("userName") ?: ""
+        ) { backStack ->
+            val viajeId = backStack.arguments?.getInt("viajeId") ?: 0
+            val viajeNombre = backStack.arguments?.getString("viajeNombre") ?: ""
+            val userName = backStack.arguments?.getString("userName") ?: ""
             AddPlaceScreen(
                 viajeId = viajeId,
                 viajeNombre = viajeNombre,
@@ -113,12 +115,12 @@ fun AppNavigation() {
             )
         }
 
-        //Detalle del lugar
+        // 🔴 Detalle del lugar
         composable(
-            route = "placeDetail/{placeId}",
+            route = "${NavScreens.PLACE_DETAIL.name}/{placeId}",
             arguments = listOf(navArgument("placeId") { type = NavType.IntType })
-        ) { backStackEntry ->
-            val placeId = backStackEntry.arguments?.getInt("placeId") ?: 0
+        ) { backStack ->
+            val placeId = backStack.arguments?.getInt("placeId") ?: 0
             PlaceDetailScreen(
                 lugarId = placeId,
                 navController = navController
