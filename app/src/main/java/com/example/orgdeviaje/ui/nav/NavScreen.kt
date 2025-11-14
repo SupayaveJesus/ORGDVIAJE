@@ -6,6 +6,7 @@ enum class NavScreens {
     MY_TRIPS,
     ADD_TRIP,
     TRIP_DETAIL,
+    EDIT_PLACE,
     ADD_PLACE,
-    PLACE_DETAIL
+    PLACE_DETAIL,
 }

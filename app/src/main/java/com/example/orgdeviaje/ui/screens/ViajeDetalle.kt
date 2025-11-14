@@ -1,6 +1,7 @@
 package com.example.orgdeviaje.ui.screens
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -17,6 +18,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.orgdeviaje.data.model.Lugar
+import com.example.orgdeviaje.ui.nav.NavScreens
 import com.example.orgdeviaje.ui.theme.ORGDEViajeTheme
 import com.example.orgdeviaje.viewmodels.LugarViewModel
 
@@ -25,7 +27,7 @@ import com.example.orgdeviaje.viewmodels.LugarViewModel
 fun TripDetalleScreen(
     viajeId: Int,
     viajeNombre: String,
-    userName: String,
+    username: String,
     navController: NavController,
     viewModel: LugarViewModel = viewModel()
 ) {
@@ -59,10 +61,11 @@ fun TripDetalleScreen(
                         Text("Volver")
                     }
                     Button(onClick = {
-                        navController.navigate("addPlace/$viajeId/$viajeNombre/$userName")
+                        navController.navigate("${NavScreens.ADD_PLACE.name}/$viajeId/$viajeNombre/$username")
                     }) {
                         Text("Agregar Lugar")
                     }
+
                 }
             }
         }
@@ -74,7 +77,7 @@ fun TripDetalleScreen(
         ) {
             if (lugares.isEmpty()) {
                 Text(
-                    text = "Aún no hay lugares agregados a este viaje 🏝️",
+                    text = "Aún no hay lugares agregados a este viaje️",
                     modifier = Modifier.align(Alignment.Center)
                 )
             } else {
@@ -84,7 +87,13 @@ fun TripDetalleScreen(
                         .fillMaxSize()
                 ) {
                     items(lugares) { lugar ->
-                        LugarCard(lugar = lugar)
+                        LugarCard(
+                            lugar = lugar,
+                            navController = navController,
+                            username = username,
+                            viajeId = viajeId
+                        )
+
                     }
                 }
             }
@@ -93,13 +102,25 @@ fun TripDetalleScreen(
 }
 
 @Composable
-fun LugarCard(lugar: Lugar) {
+fun LugarCard(
+    lugar: Lugar,
+    navController: NavController,
+    username: String,
+    viajeId: Int
+)
+{
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = 8.dp)
+            .clickable {
+                navController.navigate(
+                    "${NavScreens.PLACE_DETAIL.name}/${lugar.id}/$username/$viajeId"
+                )
+            }
+        ,
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
+    ){
         Column(Modifier.padding(12.dp)) {
             if (!lugar.imagenUrl.isNullOrEmpty()) {
                 Image(
@@ -142,7 +163,7 @@ fun TripDetallePreview() {
         TripDetalleScreen(
             viajeId = 1,
             viajeNombre = "Viaje a Disney",
-            userName = "pepito",
+            username = "pepito",
             navController = navController
         )
     }

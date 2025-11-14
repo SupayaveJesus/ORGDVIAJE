@@ -19,7 +19,8 @@ import com.example.orgdeviaje.viewmodels.LugarViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddPlaceScreen(
+fun EditPlaceScreen(
+    lugarId: Int,
     viajeId: Int,
     viajeNombre: String,
     username: String,
@@ -36,52 +37,72 @@ fun AddPlaceScreen(
 
     var showError by remember { mutableStateOf(false) }
     var showSuccess by remember { mutableStateOf(false) }
+    var loading by remember { mutableStateOf(true) }
+
+    // ✅ Cargar datos reales desde la API
+    LaunchedEffect(lugarId) {
+        loading = true
+        try {
+            val lugar = viewModel.getPlaceById(lugarId)
+            lugar?.let {
+                nombre = TextFieldValue(it.nombre ?: "")
+                ciudad = TextFieldValue(it.ciudad ?: "")
+                descripcion = TextFieldValue(it.descripcion ?: "")
+                imagenUrl = TextFieldValue(it.imagenUrl ?: "")
+                indicaciones = TextFieldValue(it.indicaciones ?: "")
+                tiempo = TextFieldValue(it.tiempoEstimado ?: "")
+                precio = TextFieldValue(it.precio ?: "")
+            }
+        } catch (e: Exception) {
+            println("Error cargando lugar: ${e.message}")
+        } finally {
+            loading = false
+        }
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Nuevo lugar para $viajeNombre") },
+                title = { Text("Editar Lugar") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Volver"
-                        )
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
                     }
                 }
             )
         }
     ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize(),
-            contentAlignment = Alignment.TopCenter
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
+        if (loading) {
+            Box(
                 modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .padding(paddingValues)
                     .padding(20.dp)
-                    .fillMaxWidth()
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 OutlinedTextField(
                     value = nombre,
                     onValueChange = { nombre = it },
                     label = { Text("Nombre del lugar") },
-                    singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
-
                 Spacer(modifier = Modifier.height(12.dp))
 
                 OutlinedTextField(
                     value = ciudad,
                     onValueChange = { ciudad = it },
                     label = { Text("Ciudad") },
-                    singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
-
                 Spacer(modifier = Modifier.height(12.dp))
 
                 OutlinedTextField(
@@ -90,53 +111,45 @@ fun AddPlaceScreen(
                     label = { Text("Descripción") },
                     modifier = Modifier.fillMaxWidth()
                 )
-
                 Spacer(modifier = Modifier.height(12.dp))
 
                 OutlinedTextField(
                     value = imagenUrl,
                     onValueChange = { imagenUrl = it },
                     label = { Text("URL de la imagen") },
-                    singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
-
                 Spacer(modifier = Modifier.height(12.dp))
 
                 OutlinedTextField(
                     value = indicaciones,
                     onValueChange = { indicaciones = it },
-                    label = { Text("Indicaciones (cómo llegar)") },
+                    label = { Text("Indicaciones") },
                     modifier = Modifier.fillMaxWidth()
                 )
-
                 Spacer(modifier = Modifier.height(12.dp))
 
                 OutlinedTextField(
                     value = tiempo,
                     onValueChange = { tiempo = it },
                     label = { Text("Tiempo estimado (ej. 2h)") },
-                    singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
-
                 Spacer(modifier = Modifier.height(12.dp))
 
                 OutlinedTextField(
                     value = precio,
                     onValueChange = { precio = it },
                     label = { Text("Precio estimado") },
-                    singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
-
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
                 Button(
                     onClick = {
                         if (nombre.text.isNotEmpty() && ciudad.text.isNotEmpty()) {
-                            val nuevoLugar = Lugar(
-                                id = null,
+                            val lugarActualizado = Lugar(
+                                id = lugarId,
                                 nombre = nombre.text,
                                 ciudad = ciudad.text,
                                 descripcion = descripcion.text,
@@ -147,7 +160,7 @@ fun AddPlaceScreen(
                                 idViaje = viajeId
                             )
 
-                            viewModel.createPlace(nuevoLugar) { success ->
+                            viewModel.updatePlace(lugarActualizado) { success ->
                                 if (success) {
                                     showSuccess = true
                                     navController.popBackStack()
@@ -161,7 +174,7 @@ fun AddPlaceScreen(
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Guardar lugar")
+                    Text("Guardar cambios")
                 }
 
                 if (showError) {
@@ -175,7 +188,7 @@ fun AddPlaceScreen(
                 if (showSuccess) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "¡Lugar agregado con éxito!",
+                        text = "Cambios guardados con éxito.",
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
@@ -186,10 +199,11 @@ fun AddPlaceScreen(
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun AddPlaceScreenPreview() {
+fun EditPlaceScreenPreview() {
     ORGDEViajeTheme {
         val navController = rememberNavController()
-        AddPlaceScreen(
+        EditPlaceScreen(
+            lugarId = 1,
             viajeId = 1,
             viajeNombre = "Viaje a Disney",
             username = "pepito",

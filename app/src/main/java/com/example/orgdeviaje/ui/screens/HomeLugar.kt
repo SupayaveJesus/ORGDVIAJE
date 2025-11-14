@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.orgdeviaje.ui.nav.NavScreens
 import com.example.orgdeviaje.ui.theme.ORGDEViajeTheme
 import com.example.orgdeviaje.viewmodels.ViajeViewModel
 
@@ -51,15 +52,19 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    OutlinedButton(onClick = {
-                        navController.navigate("mytrips/$username")
-                    }) {
-                        Text("Mis Viajes")
+                    Button(
+                        onClick = {
+                            navController.navigate("${NavScreens.MY_TRIPS.name}/$username")
+                        }
+                    ) {
+                        Text("Mis viajes")
                     }
 
-                    Button(onClick = {
-                        navController.navigate("addTrip/$username")
-                    }) {
+                    Button(
+                        onClick = {
+                            navController.navigate("${NavScreens.ADD_TRIP.name}/$username")
+                        }
+                    ) {
                         Text("Nuevo Viaje")
                     }
                 }
@@ -90,9 +95,10 @@ fun HomeScreen(
                                 .padding(vertical = 6.dp),
                             onClick = {
                                 navController.navigate(
-                                    "tripDetail/${viaje.id}/${viaje.nombre}/$username"
+                                    "${NavScreens.TRIP_DETAIL.name}/${viaje.id}/${viaje.nombre}/$username"
                                 )
                             }
+
                         ) {
                             Column(
                                 Modifier

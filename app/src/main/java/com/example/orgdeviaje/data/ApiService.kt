@@ -22,12 +22,15 @@ interface ApiService {
     @DELETE("trips/{id}")
     suspend fun eliminarViaje(@Path("id") id: Int)
 
-    //LUGAR
+    // LUGAR
     @GET("trips/{viajeId}/places")
     suspend fun getLugaresPorViaje(@Path("viajeId") viajeId: Int): List<Lugar>
 
     @GET("places")
     suspend fun getLugares(): List<Lugar>
+
+    @GET("places/{id}")
+    suspend fun getLugarPorId(@Path("id") id: Int): Lugar
 
     @POST("places")
     suspend fun crearLugar(@Body lugar: Lugar): Lugar
@@ -37,4 +40,5 @@ interface ApiService {
 
     @DELETE("places/{id}")
     suspend fun eliminarLugar(@Path("id") id: Int)
+
 }

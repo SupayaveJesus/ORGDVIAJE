@@ -33,7 +33,7 @@ import com.example.orgdeviaje.viewmodels.ViajeViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddTripScreen(
-    userName: String,
+    username: String,
     navController: NavController,
     viewModel: ViajeViewModel = ViajeViewModel()
 ) {
@@ -60,7 +60,7 @@ fun AddTripScreen(
                 modifier = Modifier.padding(20.dp)
             ) {
                 Text(
-                    text = "Crea un viaje para $userName",
+                    text = "Crea un viaje para $username",
                     style = MaterialTheme.typography.titleMedium
                 )
                 Spacer(modifier = Modifier.height(30.dp))
@@ -91,7 +91,7 @@ fun AddTripScreen(
                             val nuevoViaje = Viaje(
                                 id = null,
                                 nombre = nombre.text,
-                                usuario = userName,
+                                usuario = username,
                                 pais = pais.text
                             )
 

@@ -29,22 +29,22 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.orgdeviaje.data.model.Viaje
-import com.example.orgdeviaje.ui.nav.NavScreen
+import com.example.orgdeviaje.ui.nav.NavScreens
 import com.example.orgdeviaje.ui.theme.ORGDEViajeTheme
 import com.example.orgdeviaje.viewmodels.ViajeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MisViajesScreen(
-    userName: String,
+    username: String,
     navController: NavController,
-    viewModel: ViajeViewModel = viewModel()
+    viajeViewModel: ViajeViewModel = viewModel()
 ) {
-    val misViajes = viewModel.listViajes
+    val viajes = viajeViewModel.listViajes
 
     // Cargar los viajes del usuario logueado de la APi
-    LaunchedEffect(userName) {
-        viewModel.getTripsByUsername(userName)
+    LaunchedEffect(username) {
+        viajeViewModel.getTripsByUsername(username)
     }
 
     Scaffold(
@@ -52,7 +52,7 @@ fun MisViajesScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Tus viajes: $userName",
+                        text = "Tus viajes: $username",
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -71,12 +71,17 @@ fun MisViajesScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    OutlinedButton(onClick = { navController.popBackStack() }) {
+                    OutlinedButton(
+                        onClick = { navController.popBackStack() }) {
                         Text("Volver")
                     }
-                    Button(onClick = {
-                        navController.navigate("addTrip/$userName")
-                    }) {
+                    Button(
+                        onClick = {
+                            navController.navigate(
+                                "${NavScreens.TRIP_DETAIL.name}/0/Nuevo Viaje/$username"
+                            )
+                        }
+                    ) {
                         Text("Crear Viaje")
                     }
                 }
@@ -88,7 +93,7 @@ fun MisViajesScreen(
                 .padding(padding)
                 .fillMaxSize()
         ) {
-            if (misViajes.isEmpty()) {
+            if (viajes.isEmpty()) {
                 Text(
                     text = "No tienes viajes aún, crea uno nuevo",
                     modifier = Modifier.align(Alignment.Center)
@@ -99,8 +104,8 @@ fun MisViajesScreen(
                         .padding(horizontal = 16.dp, vertical = 10.dp)
                         .fillMaxSize()
                 ) {
-                    items(misViajes) { viaje ->
-                        ViajeCard(viaje = viaje, navController = navController, userName = userName)
+                    items(viajes) { viaje ->
+                        ViajeCard(viaje = viaje, navController = navController, username = username)
                     }
                 }
             }
@@ -109,13 +114,13 @@ fun MisViajesScreen(
 }
 
 @Composable
-fun ViajeCard(viaje: Viaje, navController: NavController, userName: String) {
+fun ViajeCard(viaje: Viaje, navController: NavController, username: String) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 6.dp),
         onClick = {
-            navController.navigate("tripDetail/${viaje.id}/${viaje.nombre}/$userName")
+            navController.navigate("${NavScreens.TRIP_DETAIL.name}/${viaje.id}/${viaje.nombre}/$username")
         }
     ) {
         Column(Modifier.padding(16.dp)) {
@@ -128,7 +133,7 @@ fun ViajeCard(viaje: Viaje, navController: NavController, userName: String) {
                 style = MaterialTheme.typography.bodyMedium
             )
             Text(
-                text = "👤 ${viaje.usuario ?: "(Desconocido)"}",
+                text = "${viaje.usuario ?: "(Desconocido)"}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -136,11 +141,12 @@ fun ViajeCard(viaje: Viaje, navController: NavController, userName: String) {
     }
 }
 
+
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun MisViajesPreview() {
     ORGDEViajeTheme {
         val navController = rememberNavController()
-        MisViajesScreen(userName = "pepito", navController = navController)
+        MisViajesScreen(username = "pepito", navController = navController)
     }
 }
